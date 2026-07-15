@@ -18,7 +18,9 @@ COLUMNS = [
     "Offer",
     "Rejected",
     "Notes",
+    "Job URL",
 ]
+_URL_COL = COLUMNS.index("Job URL")
 
 
 def ensure_workbook(path: str) -> None:
@@ -33,13 +35,19 @@ def ensure_workbook(path: str) -> None:
 
 
 def upsert_row(path: str, row: dict) -> None:
-    """Insert a row for (Company, Role), or update the existing one in place if already synced."""
+    """Insert a row for this job's URL, or update the existing one in place if already synced.
+
+    Keyed on URL rather than (Company, Role): distinct postings can share an
+    identical title at the same company (e.g. multiple "Accenture - Custom
+    Software Engineer" listings from one Naukri search), which used to
+    silently collapse into a single row and lose real job records.
+    """
     ensure_workbook(path)
     wb = load_workbook(path)
     ws: Worksheet = wb["Applications"]
 
     for existing in ws.iter_rows(min_row=2):
-        if existing[0].value == row.get("Company") and existing[1].value == row.get("Role"):
+        if existing[_URL_COL].value == row.get("Job URL"):
             for i, col in enumerate(COLUMNS):
                 if col in row:
                     existing[i].value = row[col]
@@ -50,15 +58,15 @@ def upsert_row(path: str, row: dict) -> None:
     wb.save(path)
 
 
-def update_status(path: str, company: str, role: str, column: str, value: str) -> bool:
-    """Find the row matching company+role and update one status column. Returns True if found."""
+def update_status(path: str, job_url: str, column: str, value: str) -> bool:
+    """Find the row matching this job's URL and update one status column. Returns True if found."""
     wb = load_workbook(path)
     ws: Worksheet = wb["Applications"]
-    col_index = COLUMNS.index(column) + 1
+    col_index = COLUMNS.index(column)
 
     for row in ws.iter_rows(min_row=2):
-        if row[0].value == company and row[1].value == role:
-            row[col_index - 1].value = value
+        if row[_URL_COL].value == job_url:
+            row[col_index].value = value
             wb.save(path)
             return True
     return False

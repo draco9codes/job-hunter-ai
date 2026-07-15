@@ -173,6 +173,7 @@ def track() -> None:
                     "Resume Used": application.resume_version_id if application.resume_version_id is not None else "",
                     "Applied": "Y" if application.status == ApplicationStatus.APPLIED else "",
                     "Notes": application.notes,
+                    "Job URL": job.url,
                 },
             )
     print("[green]Tracker synced.[/green]")
