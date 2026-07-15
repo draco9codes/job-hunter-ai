@@ -42,7 +42,7 @@ def _match_with_keywords(job: Job, master_resume: dict) -> MatchResult:
 
 def _match_with_llm(job: Job, master_resume: dict) -> MatchResult:
     client = get_client()
-    model = get_model()
+    model = get_model(purpose="match")
 
     prompt = f"""You are scoring how well a candidate's resume matches a job description.
 Resume (JSON, source of truth -- do not assume anything beyond it):

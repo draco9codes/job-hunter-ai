@@ -4,7 +4,6 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 from rich import print
-from rich.table import Table
 
 from database.db import get_connection, init_db, insert_job, insert_resume_version, list_jobs, upsert_application
 from matcher.matcher import match_job
@@ -78,22 +77,17 @@ def match(platform: str = typer.Option(None, help="Only match jobs from this pla
             print("[yellow]No unmatched jobs found. Run `scrape` first.[/yellow]")
             return
 
-        table = Table(title="Match results")
-        table.add_column("Company")
-        table.add_column("Title")
-        table.add_column("Match %")
-
-        for job in jobs:
+        for i, job in enumerate(jobs, start=1):
             result = match_job(job, master_resume)
-            status = ApplicationStatus.MATCHED
             upsert_application(
                 conn,
-                Application(job_id=job.id, match_percent=result.percent, status=status, notes=result.reasoning),
+                Application(
+                    job_id=job.id, match_percent=result.percent, status=ApplicationStatus.MATCHED, notes=result.reasoning
+                ),
             )
+            conn.commit()  # commit per job -- a long LLM-backed batch shouldn't lose everything if interrupted
             flag = "[green]" if result.percent >= min_percent else "[dim]"
-            table.add_row(job.company, job.title, f"{flag}{result.percent}%[/]")
-
-        print(table)
+            print(f"({i}/{len(jobs)}) {job.company} -- {job.title}: {flag}{result.percent}%[/]")
 
 
 @app.command("generate-resume")

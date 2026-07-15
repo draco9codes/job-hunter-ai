@@ -31,10 +31,19 @@ def get_client() -> OpenAI:
     return OpenAI()
 
 
-def get_model() -> str:
+def get_model(purpose: str = "generate") -> str:
+    """purpose="match" lets matching use a smaller/faster model than resume
+    generation -- match just scores relevance, generation writes content
+    that goes on your actual resume, so quality matters more there."""
     if provider() == "ollama":
-        return os.getenv("OLLAMA_MODEL", "qwen3:8b")
-    return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        default = os.getenv("OLLAMA_MODEL", "qwen3:8b")
+        if purpose == "match":
+            return os.getenv("OLLAMA_MATCH_MODEL", default)
+        return default
+    default = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    if purpose == "match":
+        return os.getenv("OPENAI_MATCH_MODEL", default)
+    return default
 
 
 def parse_json_response(content: str) -> dict:
