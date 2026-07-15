@@ -84,13 +84,18 @@ keyword overlap so the pipeline still runs end-to-end -- expect low, noisy
 scores until you set up an LLM. `generate-resume` always requires one (no
 keyword fallback for tailoring).
 
-`match` can use a separate, smaller/faster model than `generate-resume` via
-`OLLAMA_MATCH_MODEL` (e.g. `qwen3:4b`) -- relevance scoring needs far less
-reasoning than writing content that ends up on your actual resume, and on a
-6GB card an 8B model is genuinely too slow to run against dozens of jobs
-every day. Both `match` and `generate-resume` commit progress after each
-job, so a long batch is safe to interrupt (Ctrl+C) without losing what's
-already done.
+`match` can use a separate model than `generate-resume` via
+`OLLAMA_MATCH_MODEL`, in case a smaller model helps on your hardware -- but
+tested here with `qwen3:4b`, it didn't: both plain and with a `/no_think`
+prefix (Qwen3's reasoning-trace-skip directive, which this Ollama build
+doesn't appear to respect anyway) it averaged ~90-100s/job, no better than
+`qwen3:8b`'s baseline, for a strictly weaker model. On this hardware, local
+matching at dozens-of-jobs scale is just slow, full stop -- run `match`
+against a small platform slice at a time (`--platform naukri`) rather than
+everything scraped, or accept OpenAI's near-zero per-job cost for `match`
+specifically if that trade-off is ever acceptable. Both `match` and
+`generate-resume` commit progress after each job, so a long batch is safe to
+interrupt (Ctrl+C) without losing what's already done.
 
 ## Architecture
 

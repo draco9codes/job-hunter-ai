@@ -8,6 +8,7 @@ database/*.db-journal
 database/*.db-wal
 database/*.db-shm
 tracker/*.xlsx
+tracker/.~lock.*#
 logs/*.log
 resumes/generated/
 .DS_Store
