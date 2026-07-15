@@ -31,11 +31,19 @@ proves itself.
   a search keyword rather than a company (Naukri doesn't expose per-company
   boards), and a captcha can occasionally still appear, in which case solve
   it in the visible browser window and re-run `scrape`.
-- LinkedIn, Wellfound, Instahyre, Foundit aren't implemented -- new
-  platforms should implement `scrapers/base.py`'s `JobScraper` interface.
-  LinkedIn in particular requires being logged into your real account to
-  browse jobs and aggressively bans accounts it flags as automated, so
-  think carefully before automating it while you're job-hunting.
+- **Instahyre's public search API is genuinely open** -- no signed token, no
+  captcha, works from a plain `httpx` call with no browser or session at all
+  (`scrapers/instahyre.py`). The one catch: it only accepts a single
+  keyword/phrase per call (comma-separated values are rejected outright), so
+  `target` is one skill like `"spring boot"`, and it doesn't return the full
+  job description -- that's rendered client-side from an authenticated
+  endpoint, so the `keywords` tag list is used as a lighter-weight
+  description proxy instead of paying for a Playwright page load per job.
+- LinkedIn, Wellfound, Foundit aren't implemented -- new platforms should
+  implement `scrapers/base.py`'s `JobScraper` interface. LinkedIn in
+  particular requires being logged into your real account to browse jobs and
+  aggressively bans accounts it flags as automated, so think carefully
+  before automating it while you're job-hunting.
 
 ## Setup
 
@@ -52,17 +60,20 @@ only source of truth the resume generator is allowed to draw from.
 
 Edit `config.yaml` to list what to scrape: Greenhouse board tokens / Lever
 site slugs (taken from their public careers page URL) for company-scoped
-scraping, and Naukri search keywords for keyword-based scraping.
+scraping, and Naukri/Instahyre search keywords for keyword-based scraping
+(Instahyre needs one keyword per list entry -- it rejects comma-separated
+values).
 
 ## Usage
 
 ```bash
-python main.py init              # create the SQLite DB and Excel tracker
-python main.py scrape             # pull jobs from all configured targets
-python main.py match              # score match % for every new job
-python main.py generate-resume    # tailor a resume for jobs above the match threshold
-python main.py apply <job_id>     # open the application page for manual review/submit
-python main.py track              # sync everything into tracker/applications.xlsx
+python main.py init                     # create the SQLite DB and Excel tracker
+python main.py scrape                    # pull jobs from all configured targets
+python main.py match                     # score match % for every new job
+python main.py match --platform naukri   # ...or just one platform, to bound how long a local-LLM run takes
+python main.py generate-resume           # tailor a resume for jobs above the match threshold
+python main.py apply <job_id>            # open the application page for manual review/submit
+python main.py track                     # sync everything into tracker/applications.xlsx
 ```
 
 By default `.env.example` is set up for a **local Ollama model** (`qwen3:8b`)
@@ -73,15 +84,23 @@ keyword overlap so the pipeline still runs end-to-end -- expect low, noisy
 scores until you set up an LLM. `generate-resume` always requires one (no
 keyword fallback for tailoring).
 
+`match` can use a separate, smaller/faster model than `generate-resume` via
+`OLLAMA_MATCH_MODEL` (e.g. `qwen3:4b`) -- relevance scoring needs far less
+reasoning than writing content that ends up on your actual resume, and on a
+6GB card an 8B model is genuinely too slow to run against dozens of jobs
+every day. Both `match` and `generate-resume` commit progress after each
+job, so a long batch is safe to interrupt (Ctrl+C) without losing what's
+already done.
+
 ## Architecture
 
 ```
 CLI (main.py, Typer)
-  -> scrapers/  (JobScraper interface; greenhouse.py, lever.py, naukri.py implementations)
+  -> scrapers/  (JobScraper interface; greenhouse.py, lever.py, naukri.py, instahyre.py implementations)
   -> database/  (raw sqlite3, schema.sql -- no ORM, five tables, single writer)
   -> matcher/   (LLM match % with keyword-overlap fallback)
   -> resume/    (LLM tailoring + code-level integrity check against master resume)
-  -> tracker/   (openpyxl Excel read/upsert)
+  -> tracker/   (openpyxl Excel read/upsert, schema auto-migrates in place)
 ```
 
 ## Sprint log
@@ -106,6 +125,33 @@ Playwright-based Naukri scraper (keyword search, real browser, no anti-bot
 bypass) since there's no fixed target-company list yet -- verified live,
 found 20 real Java/Spring Boot listings on the first run with no captcha.
 
-Next: run the full scrape -> match -> generate-resume -> apply loop against
-real Naukri + Greenhouse results and see what the match scores look like on
-actual jobs.
+**Sprint 3 (2026-07-15/16):** Ran the pipeline live end-to-end against real
+data and fixed what broke:
+- `match`/`generate-resume` used to hold one DB connection for the whole
+  batch and only commit at the very end -- a 60-job local-LLM match run and
+  a crash mid-`generate-resume` both silently lost real work before this was
+  fixed to commit per job.
+- `generate-resume` used to abort the entire batch on one malformed LLM
+  response (a missing `project.name` key); now isolates per-job failures
+  and defensively falls back on missing fields instead of crashing.
+- The Excel tracker's `upsert_row` matched existing rows by `(Company,
+  Role)`, which silently collapsed distinct postings sharing an identical
+  title at the same company (10 different "Accenture - Custom Software
+  Engineer" listings from one Naukri search) into a single row -- 60 matched
+  jobs synced down to 42 rows with no error. Now keyed on the job's URL
+  (added as a new "Job URL" column) instead.
+- Added a "Job Type" column (Remote/Hybrid/Onsite), inferred from
+  location/title/description keywords since none of the scrapers expose a
+  clean structured field for it.
+- `ensure_workbook` now migrates the tracker's schema in place (preserving
+  every row, including manual notes) instead of crashing when `COLUMNS`
+  changes -- adding the Job Type column broke the existing tracker file
+  before this fix.
+- Added `scrapers/instahyre.py`: unlike Naukri, Instahyre's search API needs
+  no anti-bot workaround at all -- a plain HTTP call gets real results
+  (175 jobs for one keyword, sub-second).
+- `.env` was silently ignored the whole time -- `python-dotenv` was
+  installed but `load_dotenv()` was never called.
+
+Next: keep running the daily loop and see how match/generate-resume quality
+holds up over more real jobs; consider Foundit as another open-API source.
