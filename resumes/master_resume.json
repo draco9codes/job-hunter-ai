@@ -1,0 +1,53 @@
+{
+  "name": "Shivam Kumar",
+  "summary": "Software Engineer with 4+ years building enterprise web applications in Java, Spring Boot, and React, with production experience in authentication, RBAC, payment integrations, and real-time systems.",
+  "skills": [
+    "Java",
+    "Struts",
+    "Spring Boot",
+    "Hibernate/JPA",
+    "PostgreSQL",
+    "JWT",
+    "Spring Security",
+    "WebSockets/STOMP",
+    "REST APIs",
+    "React",
+    "TypeScript",
+    "Linux",
+    "Docker",
+    "Git",
+    "Python",
+    "AWS basics"
+  ],
+  "experience": [
+    {
+      "title": "Software Engineer",
+      "company": "FILL_ME_IN",
+      "duration": "FILL_ME_IN",
+      "bullets": [
+        "Built and maintained Enterprise Service Management platforms using Java, Struts, and Spring Boot.",
+        "Implemented JWT-based authentication and role-based access control (RBAC) for multi-tenant modules.",
+        "Integrated Google Maps API for location-based features and BillDesk payment gateway for transaction processing.",
+        "Built SOAP integrations to connect with third-party enterprise systems.",
+        "Optimized dashboard queries and backend performance, reducing load times on high-traffic views.",
+        "Identified and remediated OWASP top-10 vulnerabilities across the platform.",
+        "Built a real-time chat feature and an engineer-tracking module using WebSockets/STOMP."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "SkillSphere",
+      "bullets": ["FILL_ME_IN"]
+    },
+    {
+      "name": "URL Shortener",
+      "bullets": ["FILL_ME_IN"]
+    },
+    {
+      "name": "AI Shorts Automation Pipeline",
+      "bullets": ["FILL_ME_IN"]
+    }
+  ],
+  "note": "This is a structured source of truth for the resume engine. Only reorder/rephrase/highlight from here -- never let the generator add skills, employers, or metrics that aren't already present."
+}

@@ -1,0 +1,34 @@
+# job-hunter-ai configuration
+# Add company board tokens/slugs to scrape. Find them from the company's
+# careers page URL, e.g. https://boards.greenhouse.io/<token>
+# or https://jobs.lever.co/<slug>
+
+targets:
+  greenhouse:
+    - stripe
+    - notion
+  lever:
+    - []
+
+search:
+  keywords:
+    - "backend engineer"
+    - "software engineer"
+    - "java developer"
+    - "full stack engineer"
+  locations:
+    - "Remote"
+    - "India"
+    - "Bengaluru"
+  exclude_keywords:
+    - "senior staff"
+    - "principal"
+
+matcher:
+  min_match_percent: 60
+
+paths:
+  database: "database/job_hunter.db"
+  tracker_excel: "tracker/applications.xlsx"
+  resumes_dir: "resumes"
+  master_resume: "resumes/master_resume.json"

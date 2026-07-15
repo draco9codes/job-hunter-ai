@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+database/*.db
+tracker/*.xlsx
+logs/*.log
+resumes/generated/
+.DS_Store
