@@ -94,14 +94,14 @@ def _render_markdown(master_resume: dict, tailored: dict) -> str:
     lines.append("## Experience")
     for exp in tailored.get("experience", []):
         lines.append("")
-        lines.append(f"**{exp['title']}, {exp['company']}** ({exp.get('duration', '')})")
+        lines.append(f"**{exp.get('title', '')}, {exp.get('company', '')}** ({exp.get('duration', '')})")
         for bullet in exp.get("bullets", []):
             lines.append(f"- {bullet}")
     lines.append("")
     lines.append("## Projects")
     for project in tailored.get("projects", []):
         lines.append("")
-        lines.append(f"**{project['name']}**")
+        lines.append(f"**{project.get('name', '')}**")
         for bullet in project.get("bullets", []):
             lines.append(f"- {bullet}")
 

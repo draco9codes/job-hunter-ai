@@ -116,6 +116,9 @@ def generate_resume_cmd(min_match: float = None) -> None:
             except ResumeIntegrityError as exc:
                 print(f"[red]Integrity check failed for {job.company}/{job.title}: {exc}[/red]")
                 continue
+            except Exception as exc:  # noqa: BLE001 -- one malformed LLM response shouldn't kill the whole batch
+                print(f"[red]Failed to generate resume for {job.company}/{job.title}: {exc}[/red]")
+                continue
 
             resume_version = insert_resume_version(
                 conn, ResumeVersion(job_id=job.id, file_path=str(path))
@@ -123,6 +126,7 @@ def generate_resume_cmd(min_match: float = None) -> None:
             application.resume_version_id = resume_version
             application.status = ApplicationStatus.RESUME_GENERATED
             upsert_application(conn, application)
+            conn.commit()  # per job, so a later failure in the batch doesn't lose earlier successes
             print(f"[green]Generated resume for {job.company} / {job.title} -> {path}[/green]")
 
 
