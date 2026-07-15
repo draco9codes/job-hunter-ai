@@ -1,52 +1,95 @@
 {
   "name": "Shivam Kumar",
-  "summary": "Software Engineer with 4+ years building enterprise web applications in Java, Spring Boot, and React, with production experience in authentication, RBAC, payment integrations, and real-time systems.",
+  "contact": {
+    "location": "New Delhi, India",
+    "email": "shivamkumar16385@gmail.com",
+    "phone": "+91 7004633987",
+    "github": "github.com/draco9codes",
+    "linkedin": "linkedin.com/in/skumar16385"
+  },
+  "summary": "Software Engineer with 4+ years building enterprise-scale service management platforms and full-stack applications in Java, Spring Boot, and React, with production experience in authentication, RBAC, payment integrations, and real-time systems.",
   "skills": [
     "Java",
-    "Struts",
+    "JavaScript",
+    "TypeScript",
+    "SQL",
+    "Python",
     "Spring Boot",
+    "Struts",
     "Hibernate/JPA",
-    "PostgreSQL",
+    "REST APIs",
+    "WebSockets",
     "JWT",
     "Spring Security",
-    "WebSockets/STOMP",
-    "REST APIs",
+    "STOMP",
+    "SOAP APIs",
     "React",
-    "TypeScript",
-    "Linux",
-    "Docker",
+    "Tailwind CSS",
+    "Framer Motion",
+    "Axios",
+    "PostgreSQL",
+    "MongoDB",
     "Git",
-    "Python",
-    "AWS basics"
+    "Docker",
+    "Linux",
+    "AWS",
+    "FFmpeg",
+    "Ollama",
+    "System Design",
+    "Monolithic & Microservices Architecture",
+    "Realtime Systems",
+    "Performance Optimization",
+    "RBAC"
   ],
   "experience": [
     {
       "title": "Software Engineer",
-      "company": "FILL_ME_IN",
-      "duration": "FILL_ME_IN",
+      "company": "GSPL",
+      "duration": "Aug 2022 – Present",
+      "location": "New Delhi, India",
       "bullets": [
-        "Built and maintained Enterprise Service Management platforms using Java, Struts, and Spring Boot.",
-        "Implemented JWT-based authentication and role-based access control (RBAC) for multi-tenant modules.",
-        "Integrated Google Maps API for location-based features and BillDesk payment gateway for transaction processing.",
-        "Built SOAP integrations to connect with third-party enterprise systems.",
-        "Optimized dashboard queries and backend performance, reducing load times on high-traffic views.",
-        "Identified and remediated OWASP top-10 vulnerabilities across the platform.",
-        "Built a real-time chat feature and an engineer-tracking module using WebSockets/STOMP."
+        "Developed and maintained enterprise-scale service management platforms using Java, Struts, PostgreSQL, and REST APIs for deployments across India, UAE, Vietnam, and KSA.",
+        "Built secure backend APIs for mobile applications using JWT authentication, session management, and role-based authorization.",
+        "Redesigned KPI dashboard aggregation architecture by replacing inefficient CUBE-based querying with optimized GROUPING SETS, improved indexing strategies, and paginated data loading for faster analytics performance.",
+        "Implemented realtime chat systems and live engineer-tracking functionality using WebSockets and polling-based synchronization.",
+        "Integrated Google Maps APIs, BillDesk payment gateway, SMS vendor APIs, and legacy SOAP/REST services into existing monolithic and hybrid application ecosystems.",
+        "Resolved OWASP-reported vulnerabilities including XSS, insecure headers, and authentication loopholes across customer-facing deployments."
       ]
     }
   ],
   "projects": [
     {
       "name": "SkillSphere",
-      "bullets": ["FILL_ME_IN"]
+      "stack": "React, TypeScript, Spring Boot, PostgreSQL, WebSockets",
+      "bullets": [
+        "Engineered a gamified full-stack learning platform featuring skill-tree progression systems, collaborative study rooms, project workflows, and realtime communication capabilities.",
+        "Designed scalable backend architecture using Spring Boot, JWT authentication, RBAC, DTO mapping, PostgreSQL persistence, and layered service patterns.",
+        "Implemented realtime collaborative study rooms using WebSockets/STOMP with live chat, room presence tracking, and moderation capabilities."
+      ]
     },
     {
-      "name": "URL Shortener",
-      "bullets": ["FILL_ME_IN"]
+      "name": "URL Shortener Service",
+      "stack": "Spring Boot, PostgreSQL, React",
+      "bullets": [
+        "Developed a scalable URL shortening service with short-code generation, redirect handling, and analytics tracking capabilities.",
+        "Built RESTful APIs and optimized database queries for fast redirection and retrieval performance."
+      ]
     },
     {
       "name": "AI Shorts Automation Pipeline",
-      "bullets": ["FILL_ME_IN"]
+      "stack": "Python, Ollama, Coqui TTS, FFmpeg",
+      "bullets": [
+        "Built an automated AI-content pipeline that aggregates trending news, ranks content using custom scoring logic, and generates short-form scripts using local LLM inference.",
+        "Integrated GPU-accelerated TTS, subtitle generation, stock-footage retrieval, and FFmpeg-based video assembly to produce upload-ready vertical short-form videos."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Technology",
+      "institution": "College of Engineering Roorkee",
+      "location": "Roorkee, India",
+      "duration": "2018 – 2022"
     }
   ],
   "note": "This is a structured source of truth for the resume engine. Only reorder/rephrase/highlight from here -- never let the generator add skills, employers, or metrics that aren't already present."

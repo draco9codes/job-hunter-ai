@@ -44,7 +44,7 @@ def generate_tailored_resume(job: Job, master_resume: dict, output_dir: Path) ->
     safe_company = "".join(c if c.isalnum() else "_" for c in job.company)
     safe_title = "".join(c if c.isalnum() else "_" for c in job.title)[:40]
     out_path = output_dir / f"{safe_company}_{safe_title}.md"
-    out_path.write_text(_render_markdown(master_resume["name"], tailored))
+    out_path.write_text(_render_markdown(master_resume, tailored))
     return out_path
 
 
@@ -76,8 +76,19 @@ def _verify_not_empty(tailored: dict) -> None:
         )
 
 
-def _render_markdown(name: str, tailored: dict) -> str:
-    lines = [f"# {name}", "", tailored.get("summary", ""), "", "## Skills", ""]
+def _render_markdown(master_resume: dict, tailored: dict) -> str:
+    contact = master_resume.get("contact", {})
+    contact_line = " | ".join(
+        v for v in [contact.get("location"), contact.get("email"), contact.get("phone")] if v
+    )
+    links_line = " | ".join(v for v in [contact.get("github"), contact.get("linkedin")] if v)
+
+    lines = [f"# {master_resume['name']}"]
+    if contact_line:
+        lines.append(contact_line)
+    if links_line:
+        lines.append(links_line)
+    lines += ["", tailored.get("summary", ""), "", "## Skills", ""]
     lines.append(", ".join(tailored.get("skills", [])))
     lines.append("")
     lines.append("## Experience")
@@ -93,4 +104,13 @@ def _render_markdown(name: str, tailored: dict) -> str:
         lines.append(f"**{project['name']}**")
         for bullet in project.get("bullets", []):
             lines.append(f"- {bullet}")
+
+    education = master_resume.get("education", [])
+    if education:
+        lines.append("")
+        lines.append("## Education")
+        for edu in education:
+            lines.append("")
+            lines.append(f"**{edu['degree']}, {edu['institution']}** ({edu.get('duration', '')})")
+
     return "\n".join(lines)
