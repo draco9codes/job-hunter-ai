@@ -1,14 +1,17 @@
 # job-hunter-ai configuration
-# Add company board tokens/slugs to scrape. Find them from the company's
-# careers page URL, e.g. https://boards.greenhouse.io/<token>
-# or https://jobs.lever.co/<slug>
+# greenhouse/lever: company board tokens/slugs, from the company's careers
+# page URL, e.g. https://boards.greenhouse.io/<token> or https://jobs.lever.co/<slug>
+# naukri: search keywords instead of companies -- Naukri doesn't expose
+# per-company boards, so these run as keyword searches (see scrapers/naukri.py)
 
 targets:
   greenhouse:
     - stripe
-    - notion
-  lever:
-    - []
+  lever: []
+  naukri:
+    - "java spring boot developer"
+    - "backend engineer java"
+    - "full stack developer java react"
 
 search:
   keywords:

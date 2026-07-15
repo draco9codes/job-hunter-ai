@@ -1,10 +1,12 @@
 from scrapers.base import JobScraper
 from scrapers.greenhouse import GreenhouseScraper
 from scrapers.lever import LeverScraper
+from scrapers.naukri import NaukriScraper
 
 SCRAPERS: dict[str, JobScraper] = {
     "greenhouse": GreenhouseScraper(),
     "lever": LeverScraper(),
+    "naukri": NaukriScraper(),
 }
 
 
