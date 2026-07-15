@@ -57,11 +57,18 @@ def insert_job(conn: sqlite3.Connection, job: Job) -> Optional[int]:
     return cursor.lastrowid if cursor.rowcount else None
 
 
-def list_jobs(conn: sqlite3.Connection, unmatched_only: bool = False) -> list[Job]:
+def list_jobs(conn: sqlite3.Connection, unmatched_only: bool = False, platform: Optional[str] = None) -> list[Job]:
     query = "SELECT * FROM jobs"
+    conditions = []
+    params: list = []
     if unmatched_only:
-        query += " WHERE id NOT IN (SELECT job_id FROM applications)"
-    rows = conn.execute(query + " ORDER BY scraped_at DESC").fetchall()
+        conditions.append("id NOT IN (SELECT job_id FROM applications)")
+    if platform:
+        conditions.append("platform = ?")
+        params.append(platform)
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+    rows = conn.execute(query + " ORDER BY scraped_at DESC", params).fetchall()
     return [_row_to_job(row) for row in rows]
 
 

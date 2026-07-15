@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import typer
+from dotenv import load_dotenv
 from rich import print
 from rich.table import Table
 
@@ -16,6 +17,8 @@ from scrapers.registry import get_scraper
 from tracker.excel_tracker import ensure_workbook, upsert_row
 from utils.apply_engine import open_application
 from utils.config import load_config
+
+load_dotenv()
 
 app = typer.Typer(help="AI Job Hunter -- scrape, match, tailor, and track job applications.")
 
@@ -63,14 +66,14 @@ def scrape() -> None:
 
 
 @app.command()
-def match() -> None:
+def match(platform: str = typer.Option(None, help="Only match jobs from this platform, e.g. naukri")) -> None:
     """Match all unmatched jobs against the master resume and record match %."""
     config = load_config()
     master_resume = json.loads(Path(config["paths"]["master_resume"]).read_text())
     min_percent = config["matcher"]["min_match_percent"]
 
     with get_connection(config["paths"]["database"]) as conn:
-        jobs = list_jobs(conn, unmatched_only=True)
+        jobs = list_jobs(conn, unmatched_only=True, platform=platform)
         if not jobs:
             print("[yellow]No unmatched jobs found. Run `scrape` first.[/yellow]")
             return
