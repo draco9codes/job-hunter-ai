@@ -1,3 +1,5 @@
+import shutil
+from datetime import datetime
 from pathlib import Path
 
 from openpyxl import Workbook, load_workbook
@@ -22,6 +24,23 @@ COLUMNS = [
     "Job URL",
 ]
 _URL_COL = COLUMNS.index("Job URL")
+
+
+def backup_workbook(path: str) -> None:
+    """Copy the current tracker to tracker/backups/ with a datetime stamp, if it exists yet.
+
+    Meant to be called once per run before syncing -- an audit trail of what
+    the tracker looked like at each point in time, separate from the live
+    file that gets edited in place.
+    """
+    if not Path(path).exists():
+        return
+    backup_dir = Path(path).parent / "backups"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    stem = Path(path).stem
+    suffix = Path(path).suffix
+    shutil.copy2(path, backup_dir / f"{stem}_{stamp}{suffix}")
 
 
 def ensure_workbook(path: str) -> None:

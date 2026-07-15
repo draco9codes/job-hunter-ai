@@ -85,6 +85,11 @@ python main.py apply <job_id>            # open the application page for manual 
 python main.py track                     # sync everything into tracker/applications.xlsx
 ```
 
+Every `track` run backs up the previous tracker to
+`tracker/backups/applications_<timestamp>.xlsx` before syncing, so you have
+an audit trail of what it looked like at each point in time -- the live
+file still gets edited in place, only the backup is immutable.
+
 By default `.env.example` is set up for a **local Ollama model** (`qwen3:8b`)
 -- zero cost, no API key, just `ollama serve` running with the model pulled.
 Set `LLM_PROVIDER=openai` (and `OPENAI_API_KEY`) instead if you'd rather use

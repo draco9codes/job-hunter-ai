@@ -13,7 +13,7 @@ from resume.generator import ResumeIntegrityError, generate_tailored_resume
 from resume.generator import PROMPT_PATH  # noqa: F401  (import guards prompt file exists)
 from models.resume import ResumeVersion
 from scrapers.registry import get_scraper
-from tracker.excel_tracker import ensure_workbook, upsert_row
+from tracker.excel_tracker import backup_workbook, ensure_workbook, upsert_row
 from utils.apply_engine import open_application
 from utils.config import load_config
 from utils.job_type import infer_job_type
@@ -157,8 +157,9 @@ def apply(job_id: int) -> None:
 
 @app.command()
 def track() -> None:
-    """Sync all applications into the Excel tracker."""
+    """Sync all applications into the Excel tracker, keeping a timestamped backup of the previous version."""
     config = load_config()
+    backup_workbook(config["paths"]["tracker_excel"])
     ensure_workbook(config["paths"]["tracker_excel"])
 
     with get_connection(config["paths"]["database"]) as conn:
