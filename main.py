@@ -66,14 +66,17 @@ def scrape() -> None:
 
 
 @app.command()
-def match(platform: str = typer.Option(None, help="Only match jobs from this platform, e.g. naukri")) -> None:
-    """Match all unmatched jobs against the master resume and record match %."""
+def match(
+    platform: str = typer.Option(None, help="Only match jobs from this platform, e.g. naukri"),
+    limit: int = typer.Option(30, help="Max jobs to match in this run -- local LLM matching is slow (~60-90s/job)"),
+) -> None:
+    """Match unmatched jobs (newest first, up to --limit) against the master resume and record match %."""
     config = load_config()
     master_resume = json.loads(Path(config["paths"]["master_resume"]).read_text())
     min_percent = config["matcher"]["min_match_percent"]
 
     with get_connection(config["paths"]["database"]) as conn:
-        jobs = list_jobs(conn, unmatched_only=True, platform=platform)
+        jobs = list_jobs(conn, unmatched_only=True, platform=platform)[:limit]
         if not jobs:
             print("[yellow]No unmatched jobs found. Run `scrape` first.[/yellow]")
             return

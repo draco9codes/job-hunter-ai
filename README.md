@@ -78,7 +78,7 @@ values).
 ```bash
 python main.py init                     # create the SQLite DB and Excel tracker
 python main.py scrape                    # pull jobs from all configured targets
-python main.py match                     # score match % for every new job
+python main.py match                     # score match % for the 30 newest unmatched jobs (--limit to change)
 python main.py match --platform naukri   # ...or just one platform, to bound how long a local-LLM run takes
 python main.py generate-resume           # tailor a resume for jobs above the match threshold
 python main.py apply <job_id>            # open the application page for manual review/submit
@@ -99,12 +99,28 @@ tested here with `qwen3:4b`, it didn't: both plain and with a `/no_think`
 prefix (Qwen3's reasoning-trace-skip directive, which this Ollama build
 doesn't appear to respect anyway) it averaged ~90-100s/job, no better than
 `qwen3:8b`'s baseline, for a strictly weaker model. On this hardware, local
-matching at dozens-of-jobs scale is just slow, full stop -- run `match`
-against a small platform slice at a time (`--platform naukri`) rather than
-everything scraped, or accept OpenAI's near-zero per-job cost for `match`
-specifically if that trade-off is ever acceptable. Both `match` and
-`generate-resume` commit progress after each job, so a long batch is safe to
-interrupt (Ctrl+C) without losing what's already done.
+matching at dozens-of-jobs scale is just slow, full stop -- `match` defaults
+to the 30 newest unmatched jobs per run (`--limit` to change, `--platform`
+to bound it to one source) rather than trying to clear everything scraped in
+one go, and accept OpenAI's near-zero per-job cost for `match` specifically
+if that trade-off is ever acceptable. Both `match` and `generate-resume`
+commit progress after each job, so a long batch is safe to interrupt
+(Ctrl+C) without losing what's already done.
+
+## Daily scheduling
+
+`scripts/run_daily.sh` runs `scrape -> match --limit 30 -> generate-resume ->
+track` and is wired into crontab (`crontab -l` to see it) for 8:40am daily.
+It starts `ollama serve` itself if it isn't already running, and logs each
+run to `logs/pipeline_<timestamp>.log`.
+
+One real constraint: Naukri/Foundit launch a *visible* browser on purpose
+(so a captcha can be solved by hand rather than silently failing), which
+means the script needs an active desktop session -- it sets `DISPLAY`/
+`XAUTHORITY` assuming you're logged into `seat0` when it fires. If you're
+logged out at 8:40am, those two scrapers will fail to launch; everything
+else (Greenhouse, Lever, Instahyre, match, generate-resume, track) doesn't
+need a display and runs fine regardless.
 
 ## Architecture
 
