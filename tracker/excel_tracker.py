@@ -8,6 +8,7 @@ COLUMNS = [
     "Role",
     "Platform",
     "Location",
+    "Job Type",
     "Salary",
     "Match %",
     "Resume Used",
@@ -24,13 +25,40 @@ _URL_COL = COLUMNS.index("Job URL")
 
 
 def ensure_workbook(path: str) -> None:
-    if Path(path).exists():
+    if not Path(path).exists():
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Applications"
+        ws.append(COLUMNS)
+        wb.save(path)
         return
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Applications"
+
+    _migrate_schema(path)
+
+
+def _migrate_schema(path: str) -> None:
+    """Rebuild the sheet under the current COLUMNS if the on-disk header is stale.
+
+    Preserves every existing row (including any manual notes/statuses you've
+    typed in) by column name, so adding a new column later doesn't require
+    deleting your tracker -- new columns just come out blank for old rows.
+    """
+    wb = load_workbook(path)
+    ws: Worksheet = wb["Applications"]
+    header = [cell.value for cell in ws[1]]
+    if header == COLUMNS:
+        return
+
+    old_rows = [
+        {header[i]: cell.value for i, cell in enumerate(row) if i < len(header)}
+        for row in ws.iter_rows(min_row=2)
+    ]
+
+    ws.delete_rows(1, ws.max_row)
     ws.append(COLUMNS)
+    for old_row in old_rows:
+        ws.append([old_row.get(col, "") for col in COLUMNS])
     wb.save(path)
 
 

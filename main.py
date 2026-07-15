@@ -16,6 +16,7 @@ from scrapers.registry import get_scraper
 from tracker.excel_tracker import ensure_workbook, upsert_row
 from utils.apply_engine import open_application
 from utils.config import load_config
+from utils.job_type import infer_job_type
 
 load_dotenv()
 
@@ -168,6 +169,7 @@ def track() -> None:
                     "Role": job.title,
                     "Platform": job.platform.value,
                     "Location": job.location or "",
+                    "Job Type": infer_job_type(job),
                     "Salary": job.salary or "",
                     "Match %": application.match_percent if application.match_percent is not None else "",
                     "Resume Used": application.resume_version_id if application.resume_version_id is not None else "",
