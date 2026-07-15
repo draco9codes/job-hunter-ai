@@ -5,6 +5,8 @@
 # per-company boards, so these run as keyword searches (see scrapers/naukri.py)
 # instahyre: single keyword/phrase per entry -- its API rejects comma-separated
 # values, so list each skill/phrase separately (see scrapers/instahyre.py)
+# foundit: search keywords like naukri -- also no per-company boards
+# (see scrapers/foundit.py)
 
 targets:
   greenhouse:
@@ -17,6 +19,9 @@ targets:
   instahyre:
     - "java"
     - "spring boot"
+  foundit:
+    - "java spring boot developer"
+    - "backend engineer java"
 
 search:
   keywords:

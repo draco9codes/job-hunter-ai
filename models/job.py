@@ -13,6 +13,7 @@ class Platform(str, Enum):
     WELLFOUND = "wellfound"
     NAUKRI = "naukri"
     INSTAHYRE = "instahyre"
+    FOUNDIT = "foundit"
 
 
 class Job(BaseModel):

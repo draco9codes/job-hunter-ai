@@ -39,7 +39,16 @@ proves itself.
   job description -- that's rendered client-side from an authenticated
   endpoint, so the `keywords` tag list is used as a lighter-weight
   description proxy instead of paying for a Playwright page load per job.
-- LinkedIn, Wellfound, Foundit aren't implemented -- new platforms should
+- **Foundit (formerly Monster India) sits behind the same kind of anti-bot
+  wall as Naukri.** Its search API (`middleware/jobsearch`) is fronted by
+  Akamai bot protection -- a plain HTTP call gets rejected with a generic
+  400 "content negotiation failed" no matter what headers are sent, which is
+  Akamai's bot-mitigation response rather than a real API error.
+  `scrapers/foundit.py` uses the same approach as Naukri: a real, visible
+  browser reads the JSON its own JavaScript legitimately requests. Its
+  results feed also mixes in sponsored/promo cards missing a real
+  `jobId`/`title` -- those are skipped rather than crashing the scraper.
+- LinkedIn, Wellfound aren't implemented -- new platforms should
   implement `scrapers/base.py`'s `JobScraper` interface. LinkedIn in
   particular requires being logged into your real account to browse jobs and
   aggressively bans accounts it flags as automated, so think carefully
@@ -60,8 +69,8 @@ only source of truth the resume generator is allowed to draw from.
 
 Edit `config.yaml` to list what to scrape: Greenhouse board tokens / Lever
 site slugs (taken from their public careers page URL) for company-scoped
-scraping, and Naukri/Instahyre search keywords for keyword-based scraping
-(Instahyre needs one keyword per list entry -- it rejects comma-separated
+scraping, and Naukri/Instahyre/Foundit search keywords for keyword-based
+scraping (Instahyre needs one keyword per list entry -- it rejects comma-separated
 values).
 
 ## Usage
@@ -101,7 +110,7 @@ interrupt (Ctrl+C) without losing what's already done.
 
 ```
 CLI (main.py, Typer)
-  -> scrapers/  (JobScraper interface; greenhouse.py, lever.py, naukri.py, instahyre.py implementations)
+  -> scrapers/  (JobScraper interface; greenhouse.py, lever.py, naukri.py, instahyre.py, foundit.py implementations)
   -> database/  (raw sqlite3, schema.sql -- no ORM, five tables, single writer)
   -> matcher/   (LLM match % with keyword-overlap fallback)
   -> resume/    (LLM tailoring + code-level integrity check against master resume)
