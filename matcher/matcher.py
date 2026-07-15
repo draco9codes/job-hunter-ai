@@ -6,11 +6,11 @@ Falls back to plain keyword overlap otherwise, so the pipeline still runs
 end-to-end with zero API cost while you're setting things up.
 """
 import json
-import os
 import re
 from dataclasses import dataclass
 
 from models.job import Job
+from utils.llm_client import get_client, get_model, has_llm_configured, parse_json_response
 
 _WORD_RE = re.compile(r"[a-zA-Z][a-zA-Z0-9+#./-]{1,}")
 
@@ -22,7 +22,7 @@ class MatchResult:
 
 
 def match_job(job: Job, master_resume: dict) -> MatchResult:
-    if os.getenv("OPENAI_API_KEY"):
+    if has_llm_configured():
         return _match_with_llm(job, master_resume)
     return _match_with_keywords(job, master_resume)
 
@@ -36,15 +36,13 @@ def _match_with_keywords(job: Job, master_resume: dict) -> MatchResult:
     overlap = resume_terms & job_terms
     percent = round(100 * len(overlap) / max(len(job_terms), 1), 1)
     percent = min(percent, 100.0)
-    reasoning = f"Keyword overlap fallback (no OPENAI_API_KEY set). Matched terms: {', '.join(sorted(overlap)) or 'none'}"
+    reasoning = f"Keyword overlap fallback (no LLM configured). Matched terms: {', '.join(sorted(overlap)) or 'none'}"
     return MatchResult(percent=percent, reasoning=reasoning)
 
 
 def _match_with_llm(job: Job, master_resume: dict) -> MatchResult:
-    from openai import OpenAI
-
-    client = OpenAI()
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    client = get_client()
+    model = get_model()
 
     prompt = f"""You are scoring how well a candidate's resume matches a job description.
 Resume (JSON, source of truth -- do not assume anything beyond it):
@@ -61,8 +59,9 @@ Base the score only on real overlap between resume content and job requirements.
         model=model,
         messages=[{"role": "user", "content": prompt}],
         response_format={"type": "json_object"},
+        temperature=0.2,
     )
-    data = json.loads(response.choices[0].message.content)
+    data = parse_json_response(response.choices[0].message.content)
     return MatchResult(percent=float(data["match_percent"]), reasoning=data["reasoning"])
 
 

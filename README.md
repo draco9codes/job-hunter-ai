@@ -51,10 +51,13 @@ python main.py apply <job_id>     # open the application page for manual review/
 python main.py track              # sync everything into tracker/applications.xlsx
 ```
 
-Without `OPENAI_API_KEY` set, `match` falls back to plain keyword overlap so
-the pipeline still runs end-to-end at zero cost -- expect low, noisy scores
-until you add a key. `generate-resume` requires the key (there's no
-non-LLM fallback for tailoring).
+By default `.env.example` is set up for a **local Ollama model** (`qwen3:8b`)
+-- zero cost, no API key, just `ollama serve` running with the model pulled.
+Set `LLM_PROVIDER=openai` (and `OPENAI_API_KEY`) instead if you'd rather use
+a hosted model. Without either configured, `match` falls back to plain
+keyword overlap so the pipeline still runs end-to-end -- expect low, noisy
+scores until you set up an LLM. `generate-resume` always requires one (no
+keyword fallback for tailoring).
 
 ## Architecture
 
